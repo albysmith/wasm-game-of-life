@@ -1,9 +1,7 @@
 use wasm_bindgen::prelude::*;
 
-
-
-use std::fs::File;
 use std::fs;
+use std::fs::File;
 use std::io::Write;
 
 // mod toml_parse;
@@ -13,7 +11,6 @@ use crate::toml_parse::*;
 // mod print_macro;
 // use crate::print_macro;
 // use print_macro::console_log;
-
 
 #[wasm_bindgen]
 #[derive(Debug)]
@@ -50,7 +47,6 @@ impl SearchItem {
     }
 }
 
-
 pub struct Database {
     pub data: Vec<Object>,
 }
@@ -80,41 +76,60 @@ impl Object {
     }
 }
 
-fn get_toml (value: String) -> String {
-    let toml_str = include_str!("print_universe.txt");
-    let toml_parsed: Toml = toml::from_str(&toml_str).expect("parsing toml");
+fn search_loop(toml: Toml, search_token: &str) -> Vec<SearchItem> {
     let mut results = vec![];
-    for item in toml_parsed.Ships.unwrap().iter() {
-        if item.owner.clone().unwrap_or_default().contains(&value) {
-            results.push(SearchItem {id: item._id.clone().unwrap_or_default(), value: item.owner.clone().unwrap_or_default()});
-            continue
+
+    for item in toml.Ships.unwrap().iter() {
+        if item
+            .owner
+            .clone()
+            .unwrap_or_default()
+            .contains(search_token)
+        {
+            results.push(SearchItem {
+                id: item._id.clone().unwrap_or_default(),
+                value: item.owner.clone().unwrap_or_default(),
+            });
+            continue;
         }
-        if item.ship.clone().unwrap_or_default().contains(&value) {
-            results.push(SearchItem {id: item._id.clone().unwrap_or_default(), value: item.ship.clone().unwrap_or_default()});
-            continue
+        if item.ship.clone().unwrap_or_default().contains(search_token) {
+            results.push(SearchItem {
+                id: item._id.clone().unwrap_or_default(),
+                value: item.ship.clone().unwrap_or_default(),
+            });
+            continue;
         }
-        if item.r#macro.clone().unwrap_or_default().contains(&value) {
-            results.push(SearchItem {id: item._id.clone().unwrap_or_default(), value: item.r#macro.clone().unwrap_or_default()});
-            continue
+        if item
+            .r#macro
+            .clone()
+            .unwrap_or_default()
+            .contains(search_token)
+        {
+            results.push(SearchItem {
+                id: item._id.clone().unwrap_or_default(),
+                value: item.r#macro.clone().unwrap_or_default(),
+            });
+            continue;
         }
-        if item._id.clone().unwrap_or_default().contains(&value) {
-            results.push(SearchItem {id: item._id.clone().unwrap_or_default(), value: item._id.clone().unwrap_or_default()})
+        if item._id.clone().unwrap_or_default().contains(search_token) {
+            results.push(SearchItem {
+                id: item._id.clone().unwrap_or_default(),
+                value: item._id.clone().unwrap_or_default(),
+            })
         }
     }
-    let result = format!("{:#?}", results);
-    result
+    results
+}
 
+fn get_toml() -> Toml {
+    let toml_parsed: Toml = toml::from_str(include_str!("print_universe.txt")).expect("parsing toml");
+    toml_parsed
 }
 
 #[wasm_bindgen]
-pub fn search(value: String) -> String {
-    let mut data = Database::new();
-    // data.add(Object::new("5_4x42o", "Energy Cells", 10));
-    // data.add(Object::new("5_jj30", "Advanced Electronics", 8));
-    // data.add(Object::new("5_gvr8f", "Hull Parts", 40));
-    // data.add(Object::new("5_gbt68d", "Claytronics", 1));
-    // data.add(Object::new("5_bdfg4", "Advanced Composites", 5));
-    let results = get_toml(value);
+pub fn search(search_token: String) -> String {
+    let data = get_toml();
+    let results = search_loop(data, &search_token);
     let result = format!("{:#?}", results);
     result
 }

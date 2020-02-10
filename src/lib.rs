@@ -9,8 +9,8 @@ use web_sys::*;
 extern crate serde;
 
 // #[macro_use]
-mod toml_parse;
 mod print_macro;
+mod toml_parse;
 use print_macro::*;
 mod database_search;
 use database_search::*;
@@ -183,5 +183,5 @@ impl Universe {
 #[wasm_bindgen]
 pub fn penis(value: String) {
     let result = search(value);
-    console_log!("{}",result);
+    console_log!("{}", result);
 }
